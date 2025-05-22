@@ -7,7 +7,6 @@ from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 
-
 class GrassPatch(Agent):
     def __init__(self, pos, model, fully_grown=True, regrowth_time=30):
         super().__init__(pos, model)
@@ -21,7 +20,6 @@ class GrassPatch(Agent):
             if self.countdown <= 0:
                 self.fully_grown = True
                 self.countdown = self.model.grass_regrowth_time
-
 
 class Sheep(Agent):
     def __init__(self, unique_id, model, energy=4):
@@ -52,7 +50,6 @@ class Sheep(Agent):
         possible_steps = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False)
         new_position = self.random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)
-
 
 class Wolf(Agent):
     def __init__(self, unique_id, model, energy=8):
@@ -85,7 +82,6 @@ class Wolf(Agent):
         new_position = self.random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)
 
-
 class WolfSheepModel(Model):
     def __init__(self, width, height, init_sheep, init_wolves, sheep_gain_from_food, wolf_gain_from_food,
                  sheep_reproduce, wolf_reproduce, grass_regrowth_time, enable_grass=True):
@@ -100,14 +96,12 @@ class WolfSheepModel(Model):
         self.grass_regrowth_time = grass_regrowth_time
         self.new_agents = []
 
-        # Grass
         if self.enable_grass:
-            for (x, y) in self.grid.coord_iter():
+            for _, (x, y) in self.grid.coord_iter():
                 patch = GrassPatch((x, y), self, fully_grown=self.random.choice([True, False]))
                 self.grid.place_agent(patch, (x, y))
                 self.schedule.add(patch)
 
-        # Sheep
         for _ in range(init_sheep):
             sheep = Sheep(self.next_id(), self)
             x = self.random.randrange(width)
@@ -115,7 +109,6 @@ class WolfSheepModel(Model):
             self.grid.place_agent(sheep, (x, y))
             self.schedule.add(sheep)
 
-        # Wolves
         for _ in range(init_wolves):
             wolf = Wolf(self.next_id(), self)
             x = self.random.randrange(width)
@@ -142,8 +135,7 @@ class WolfSheepModel(Model):
         self.new_agents = []
         self.datacollector.collect(self)
 
-
-# Streamlit UI
+# Streamlit App
 st.title("Wolf-Sheep Predation Model")
 
 cols = st.columns(2)
@@ -180,22 +172,19 @@ if st.button("Run Simulation"):
     st.line_chart(df)
 
     st.subheader("Final State Grid")
-    grid_img = np.zeros((height, width, 3))  # RGB image
+    grid_img = np.zeros((height, width, 3))
 
-    for (x, y) in model.grid.coord_iter():
+    for _, (x, y) in model.grid.coord_iter():
         cell_agents = model.grid.get_cell_list_contents([(x, y)])
-        color = [1.0, 1.0, 1.0]  # Default white
+        color = [1.0, 1.0, 1.0]
 
         for a in cell_agents:
             if isinstance(a, GrassPatch):
-                if a.fully_grown:
-                    color = [0.0, 0.6, 0.0]  # Green
-                else:
-                    color = [0.5, 0.3, 0.1]  # Brown
+                color = [0.0, 0.6, 0.0] if a.fully_grown else [0.5, 0.3, 0.1]
             elif isinstance(a, Sheep):
-                color = [0.5, 0.9, 1.0]  # Light blue
+                color = [0.5, 0.9, 1.0]
             elif isinstance(a, Wolf):
-                color = [1.0, 0.2, 0.2]  # Red
+                color = [1.0, 0.2, 0.2]
 
         grid_img[y, x] = color
 
