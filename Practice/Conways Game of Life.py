@@ -45,7 +45,7 @@ class GameOfLife(Model):
         self.grid = SingleGrid(width, height, torus=True)
         self.schedule = SimultaneousActivation(self)
 
-        for _, (x, y) in self.grid.coord_iter():
+        for (x, y), _ in self.grid.coord_iter():
             cell = Cell((x, y), self)
             if self.random.random() < initial_fraction_alive:
                 cell.state = cell.ALIVE
