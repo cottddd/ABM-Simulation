@@ -130,7 +130,9 @@ class WolfSheepModel(Model):
     def step(self):
         self.schedule.step()
         for agent in self.new_agents:
-            self.grid.place_agent(agent, agent.pos)
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+            self.grid.place_agent(agent, (x, y))
             self.schedule.add(agent)
         self.new_agents = []
         self.datacollector.collect(self)
