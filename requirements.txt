@@ -1,4 +1,4 @@
-mesa
+mesa==3.2.0
 matplotlib
 pandas
 streamlit
